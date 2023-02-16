@@ -1,2 +1,4 @@
 # TODO-api---dart
-A simple TODO API using dart.
+This is a simple TODO list API.
+
+This project was created using dart.

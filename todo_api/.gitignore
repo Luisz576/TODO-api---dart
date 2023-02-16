@@ -1,0 +1,4 @@
+.dart_tool/
+test/
+analysis_options.yaml
+CHANGELOG.md
