@@ -65,7 +65,9 @@ runServer(String address, int port){
       if(req != null){
         try{
           String title = req['title'];
-          json['result'] = await Database.instance.createTodo(title);
+          Todo? todo = await Database.instance.createTodo(title);
+          json['result'] = todo != null;
+          json['todo'] = todo?.toJson();
         }catch(_){
           json['error'] = "Invalid parameter(s)!";
         }

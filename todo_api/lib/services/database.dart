@@ -1,8 +1,25 @@
 import 'package:hive/hive.dart';
+import 'package:todo_api/errors/database_not_initialized_exception.dart';
+import 'package:todo_api/models/adapters/todo_adapter.dart';
 import 'package:todo_api/models/todo.dart';
+import 'package:path/path.dart' as path;
 
 class Database{
-  static final Database instance = Database._();
+  static Database? _instance;
+  static Database get instance{
+    if(_instance == null){
+      throw DatabaseNotInitializedException();
+    }
+    return _instance!;
+  }
+
+  static initialize(){
+    if(_instance == null){
+      Hive.init(path.current);
+      Hive.registerAdapter(TodoAdapter());
+      _instance = Database._();
+    }
+  }
 
   bool _setuped = false;
   bool get setuped => _setuped;
@@ -34,16 +51,18 @@ class Database{
     return todo;
   }
 
-  Future<bool> createTodo(String title) async{
+  Future<Todo?> createTodo(String title) async{
     if(_setuped){
       try{
-        await _hiveDb.add(Todo(DateTime.now().millisecondsSinceEpoch, title, false));
-        return true;
+        Todo todo = Todo(DateTime.now().millisecondsSinceEpoch, title, false);
+        await _hiveDb.add(todo);
+        return todo;
       }catch(_){
-        return false;
+        print(_);
+        return null;
       }
     }
-    return false;
+    return null;
   }
 
   Future<bool> makeDone(int todoId) async{
@@ -61,7 +80,8 @@ class Database{
       if(index == -1 || todo == null){
         return false;
       }
-      //TODO:
+      todo.done = true;
+      await _hiveDb.putAt(index, todo);
       return true;
     }
     return false;
@@ -69,6 +89,18 @@ class Database{
 
   Future<bool> deleteTodo(int todoId) async{
     if(_setuped){
+      int index = -1;
+      List<Todo> todos = await getTodos();
+      for(int i = 0; i < todos.length; i++){
+        if(todos[i].id == todoId){
+          index = i;
+          break;
+        }
+      }
+      if(index == -1){
+        return false;
+      }
+      await _hiveDb.deleteAt(index);
       return true;
     }
     return false;

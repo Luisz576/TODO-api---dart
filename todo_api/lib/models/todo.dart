@@ -8,7 +8,7 @@ class Todo extends HiveObject with IJson {
   @HiveField(1)
   final String title;
   @HiveField(2)
-  final bool done;
+  bool done;
 
   Todo(this.id, this.title, this.done);
   

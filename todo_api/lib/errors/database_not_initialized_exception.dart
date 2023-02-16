@@ -1,0 +1,1 @@
+class DatabaseNotInitializedException implements Exception{}
